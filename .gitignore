@@ -1,0 +1,12 @@
+/include
+/Lib
+/Scripts
+pyvenv.cfg
+
+/Archiproject/db.sqlite3
+/Archiproject/manage.py
+/Archiproject/Archiproject/__pycache__
+/Archiproject/Archiproject/__init__.py
+
+/Archiproject/ArchiAI/__pycache__
+/Archiproject/ArchiAI/__init__.py
