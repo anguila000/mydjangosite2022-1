@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H0NW5Z2MYC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-H0NW5Z2MYC');
+  </script>
+  <title>Archi Project</title>
+  <meta name="description" content="Simple Machine Learning Model into an WebApp using TensorFlow.js">
+  <meta name="keywords" content="Machine Learning, TensorFlow.js">
+  <meta name="author" content="Carlos Aguayo">
+  <style>
+    body {
+      touch-action: none;
+      /*https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action*/
+      font-family: "Roboto";
+    }
+
+    .container {
+      background-color: rgb(126, 133, 244);
+      padding: 50px;
+      width: 1000px;
+      margin: auto;
+      display: flex;
+    }
+
+    h1 {
+      margin: 50px;
+      font-size: 70px;
+      text-align: center;
+    }
+
+    #paint {
+      border: 3px solid rgb(13, 239, 13);
+      width: 256px;
+      height: 256px;
+    }
+
+    #generated {
+      border: 3px solid rgb(13, 239, 13);
+      background-color: rgb(177, 184, 183);
+      width: 256px;
+      height: 256px;
+    }
+
+    #generate {
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!--<script type="text/javascript" src="http://livejs.com/live.js"></script>-->
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.5.2/dist/tf.min.js"></script>
+
+  <h1>Simple Model Evaluation.</h1>
+  <div class="container">
+    <div id="paint">
+      <canvas id="inputCanvas" width="256" height="256"></canvas>
+    </div>
+
+    <button id="generate">Generate</button>
+
+    <div id="generated">
+      <canvas id="outCanvas" width="256" height="256"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // From https://www.html5canvastutorials.com/labs/html5-canvas-paint-application/
+
+    $(document).ready(function () {
+      // alert('ok');
+      // upload image to inputcanvas
+      var ctx = document.getElementById('inputCanvas').getContext('2d');
+      var img = new Image();
+      img.src = 'input.jpg';
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0);
+      }
+
+    });
+
+    var canvas = document.getElementById('inputCanvas');
+    var context = canvas.getContext('2d');
+
+    $('#generate').click(function () {
+      $('#generated').html('<img id="spinner" src="spinner.gif" width = "256px" />');
+
+      var img = new Image();
+      img.src = canvas.toDataURL('image/png');
+      img.onload = function () {
+        context.drawImage(img, 0, 0, 28, 28);
+        data = context.getImageData(0, 0, 28, 28).data;
+        var input = [];
+        for (var i = 0; i < data.length; i += 4) {
+          input.push(data[i + 2] / 255);
+        }
+        predict(input);
+      };
+    });
+
+    tf.loadLayersModel("model/model.json").then(function (model) {
+      window.model = model;
+    });
+
+    var predict = function (input) {
+      if (window.model) {
+        console.log("here");
+        window.model.predict([tf.tensor(input).reshape([1, 28, 28, 1])]).array().then(function (scores) {
+          scores = scores[0];
+          predicted = scores.indexOf(Math.max(...scores));
+          $('#generated').html(predicted);
+        });
+      } else {
+        // The model takes a bit to load, if we are too fast, wait
+        setTimeout(function () { predict(input) }, 50);
+      }
+    }
+
+
+  </script>
+</body>
+
+</html>
